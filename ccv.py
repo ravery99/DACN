@@ -1,6 +1,8 @@
 from keras import backend as K
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 def CCV(net_output, inputs0, max_iter, gamma, epsilon): 
     
