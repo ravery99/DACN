@@ -18,14 +18,14 @@ def configure():
     # flags.DEFINE_integer('test_step', 500, '# of step to test a model')
     # flags.DEFINE_integer('save_step', 500, '# of step to save a model')
     flags.DEFINE_integer('max_epoch', 20, '# of step in an epoch')
-    flags.DEFINE_integer('test_step', 5, '# of step to test a model')
-    flags.DEFINE_integer('save_step', 5, '# of step to save a model')
+    flags.DEFINE_integer('test_step', 4, '# of step to test a model')
+    flags.DEFINE_integer('save_step', 4, '# of step to save a model')
 
     flags.DEFINE_integer('valid_start_epoch',1,'start step to test a model')
     # flags.DEFINE_integer('valid_end_epoch',30001,'end step to test a model')
     # flags.DEFINE_integer('valid_stride_of_epoch',500,'stride to test a model')
     flags.DEFINE_integer('valid_end_epoch',21,'end step to test a model')
-    flags.DEFINE_integer('valid_stride_of_epoch',5,'stride to test a model')
+    flags.DEFINE_integer('valid_stride_of_epoch',4,'stride to test a model')
     flags.DEFINE_string('model_name', 'model', 'Model file name')
     flags.DEFINE_integer('reload_epoch', 0, 'Reload epoch')
     # flags.DEFINE_integer('test_epoch', 26501, 'Test or predict epoch')
@@ -33,7 +33,7 @@ def configure():
     flags.DEFINE_integer('random_seed', int(time.time()), 'random seed')
 
     # flags.DEFINE_integer('summary_step', 10000000, '# of step to save the summary')
-    flags.DEFINE_integer('summary_step', 5, '# of step to save the summary')
+    flags.DEFINE_integer('summary_step', 4, '# of step to save the summary')
     #—————————————————————————————————————————————————————#
 
     flags.DEFINE_float('learning_rate', 1e-3, 'learning rate')
@@ -43,12 +43,12 @@ def configure():
 
     flags.DEFINE_integer('gpu_num', 1, 'the number of GPU')
     #—————————————————————————————————————————————————————#
-    flags.DEFINE_string('data_dir', '/content/trial_h5/', 'Name of data directory')
+    flags.DEFINE_string('data_dir', '/content/herlev_h5/', 'Name of data directory')
     flags.DEFINE_string('train_data', 'herlev_train.h5', 'Training data')
     flags.DEFINE_string('valid_data', 'herlev_valid.h5', 'Validation data')
     flags.DEFINE_string('test_data', 'herlev_test.h5', 'Testing data')
-    flags.DEFINE_integer('valid_num',5,'the number of images in the validing set')
-    flags.DEFINE_integer('test_num',5,'the number of images in the testing set')
+    flags.DEFINE_integer('valid_num',184,'the number of images in the validing set')
+    flags.DEFINE_integer('test_num',92,'the number of images in the testing set')
     flags.DEFINE_integer('batch', 4, 'batch size')
     flags.DEFINE_integer('batchsize', 4, 'total batch size')
     flags.DEFINE_integer('channel', 3, 'channel size')
@@ -58,10 +58,10 @@ def configure():
     flags.DEFINE_boolean('is_training', True, '是否训练')
     flags.DEFINE_integer('class_num', 2, 'output class number')
     #————————————————————————————-—————————————————————————#
-    flags.DEFINE_string('logdir', '/content/trial_original/logdir', 'Log dir')
-    flags.DEFINE_string('modeldir', '/content/trial_original/modeldir', 'Model dir')
-    flags.DEFINE_string('sample_dir', '/content/trial_original/samples/', 'Sample directory')
-    flags.DEFINE_string('record_dir', '/content/trial_original/record/', 'Experiment record directory')
+    flags.DEFINE_string('logdir', '/content/herlev_original/logdir', 'Log dir')
+    flags.DEFINE_string('modeldir', '/content/herlev_original/modeldir', 'Model dir')
+    flags.DEFINE_string('sample_dir', '/content/herlev_original/samples/', 'Sample directory')
+    flags.DEFINE_string('record_dir', '/content/herlev_original/record/', 'Experiment record directory')
     #————————————————————————————-—————————————————————————#
     flags.DEFINE_boolean('use_asc', False, 'use ASC or not')
     flags.DEFINE_string('down_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d, adaptive_separate_conv2d')
