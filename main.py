@@ -9,8 +9,6 @@ from actions import Actions
 
 
 def configure():
-
-
     flags = tf.app.flags
 
     #————————————————————————————--—————————————————————————#
@@ -35,7 +33,7 @@ def configure():
     flags.DEFINE_integer('random_seed', int(time.time()), 'random seed')
 
     # flags.DEFINE_integer('summary_step', 10000000, '# of step to save the summary')
-    flags.DEFINE_integer('summary_step', 20, '# of step to save the summary')
+    flags.DEFINE_integer('summary_step', 5, '# of step to save the summary')
     #—————————————————————————————————————————————————————#
 
     flags.DEFINE_float('learning_rate', 1e-3, 'learning rate')
@@ -45,14 +43,14 @@ def configure():
 
     flags.DEFINE_integer('gpu_num', 1, 'the number of GPU')
     #—————————————————————————————————————————————————————#
-    flags.DEFINE_string('data_dir', '/content/trial/', 'Name of data directory')
+    flags.DEFINE_string('data_dir', '/content/trial_h5/', 'Name of data directory')
     flags.DEFINE_string('train_data', 'herlev_train.h5', 'Training data')
     flags.DEFINE_string('valid_data', 'herlev_valid.h5', 'Validation data')
     flags.DEFINE_string('test_data', 'herlev_test.h5', 'Testing data')
     flags.DEFINE_integer('valid_num',5,'the number of images in the validing set')
     flags.DEFINE_integer('test_num',5,'the number of images in the testing set')
-    flags.DEFINE_integer('batch', 1, 'batch size')
-    flags.DEFINE_integer('batchsize', 1, 'total batch size')
+    flags.DEFINE_integer('batch', 4, 'batch size')
+    flags.DEFINE_integer('batchsize', 4, 'total batch size')
     flags.DEFINE_integer('channel', 3, 'channel size')
     flags.DEFINE_integer('height', 256, 'height size')
     flags.DEFINE_integer('width', 256, 'width size')
@@ -60,10 +58,10 @@ def configure():
     flags.DEFINE_boolean('is_training', True, '是否训练')
     flags.DEFINE_integer('class_num', 2, 'output class number')
     #————————————————————————————-—————————————————————————#
-    flags.DEFINE_string('logdir', '/content/trial/logdir', 'Log dir')
-    flags.DEFINE_string('modeldir', '/content/trial/modeldir', 'Model dir')
-    flags.DEFINE_string('sample_dir', '/content/trial/samples/', 'Sample directory')
-    flags.DEFINE_string('record_dir', '/content/trial/record/', 'Experiment record directory')
+    flags.DEFINE_string('logdir', '/content/trial_original/logdir', 'Log dir')
+    flags.DEFINE_string('modeldir', '/content/trial_original/modeldir', 'Model dir')
+    flags.DEFINE_string('sample_dir', '/content/trial_original/samples/', 'Sample directory')
+    flags.DEFINE_string('record_dir', '/content/trial_original/record/', 'Experiment record directory')
     #————————————————————————————-—————————————————————————#
     flags.DEFINE_boolean('use_asc', False, 'use ASC or not')
     flags.DEFINE_string('down_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d, adaptive_separate_conv2d')

@@ -345,24 +345,23 @@ class Actions(object):
 
         print('----->saving predictions')
         print(np.shape(predictions))
-        num=0
+        num = 0
         for index, prediction in enumerate(predictions):
-
             for i in range(prediction.shape[0]):
-                np.save(self.conf.sample_dir+"pred"+str(num)+".npy",prediction[i])
+                np.save(self.conf.sample_dir+"pred"+str(num)+".npy", prediction[i])
                 num += 1
-                imsave(prediction[i], self.conf.sample_dir + str(index*prediction.shape[0]+i)+'.png')
+                # gunakan imsave fixed
+                imsave(prediction[i], self.conf.sample_dir + str(index*prediction.shape[0]+i) + '.png')
 
         print('----->saving net_predictions')
         print(np.shape(net_predictions))
-        num=0
+        num = 0
         for index, prediction in enumerate(net_predictions):
-
             for i in range(prediction.shape[0]):
-                np.save(self.conf.sample_dir+"netpred"+str(num)+".npy",prediction[i])
+                np.save(self.conf.sample_dir+"netpred"+str(num)+".npy", prediction[i])
                 num += 1
-                imsave(prediction[i], self.conf.sample_dir + str(index*prediction.shape[0]+i)+'net.png')
-
+                imsave(prediction[i], self.conf.sample_dir + str(index*prediction.shape[0]+i) + 'net.png')
+             
         return np.mean(losses),np.mean(accuracies),m_ious[-1]
 #———————————————————————————— config_summary —————————————————————————#
 
