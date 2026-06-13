@@ -17,33 +17,34 @@ def configure():
     # flags.DEFINE_integer('max_epoch', 30000, '# of step in an epoch')
     # flags.DEFINE_integer('test_step', 500, '# of step to test a model')
     # flags.DEFINE_integer('save_step', 500, '# of step to save a model')
-    flags.DEFINE_integer('max_epoch', 20, '# of step in an epoch')
-    flags.DEFINE_integer('test_step', 4, '# of step to test a model')
-    flags.DEFINE_integer('save_step', 4, '# of step to save a model')
+    flags.DEFINE_integer('max_epoch', 1000, '# of step in an epoch')
+    flags.DEFINE_integer('test_step', 50, '# of step to test a model')
+    flags.DEFINE_integer('save_step', 50, '# of step to save a model')
 
     flags.DEFINE_integer('valid_start_epoch',1,'start step to test a model')
     # flags.DEFINE_integer('valid_end_epoch',30001,'end step to test a model')
     # flags.DEFINE_integer('valid_stride_of_epoch',500,'stride to test a model')
-    flags.DEFINE_integer('valid_end_epoch',21,'end step to test a model')
-    flags.DEFINE_integer('valid_stride_of_epoch',4,'stride to test a model')
+    flags.DEFINE_integer('valid_end_epoch',1001,'end step to test a model')
+    flags.DEFINE_integer('valid_stride_of_epoch',50,'stride to test a model')
     flags.DEFINE_string('model_name', 'model', 'Model file name')
     flags.DEFINE_integer('reload_epoch', 0, 'Reload epoch')
     # flags.DEFINE_integer('test_epoch', 26501, 'Test or predict epoch')
-    flags.DEFINE_integer('test_epoch', 20, 'Test or predict epoch')
+    flags.DEFINE_integer('test_epoch', 1, 'Test or predict epoch')
     flags.DEFINE_integer('random_seed', int(time.time()), 'random seed')
 
     # flags.DEFINE_integer('summary_step', 10000000, '# of step to save the summary')
-    flags.DEFINE_integer('summary_step', 4, '# of step to save the summary')
+    flags.DEFINE_integer('summary_step', 50, '# of step to save the summary')
     #—————————————————————————————————————————————————————#
 
-    flags.DEFINE_float('learning_rate', 1e-3, 'learning rate')
+    # flags.DEFINE_float('learning_rate', 1e-3, 'learning rate')
+    flags.DEFINE_float('learning_rate', 1e-4, 'learning rate')
     flags.DEFINE_float('beta1', 0.9, 'beta1')
     flags.DEFINE_float('beta2', 0.99, 'beta2')
     flags.DEFINE_float('epsilon', 1e-8, 'epsilon')
 
     flags.DEFINE_integer('gpu_num', 1, 'the number of GPU')
     #—————————————————————————————————————————————————————#
-    flags.DEFINE_string('data_dir', '/content/herlev_h5/', 'Name of data directory')
+    flags.DEFINE_string('data_dir', '/content/herlev_upscaled_h5/', 'Name of data directory')
     flags.DEFINE_string('train_data', 'herlev_train.h5', 'Training data')
     flags.DEFINE_string('valid_data', 'herlev_valid.h5', 'Validation data')
     flags.DEFINE_string('test_data', 'herlev_test.h5', 'Testing data')
@@ -58,10 +59,10 @@ def configure():
     flags.DEFINE_boolean('is_training', True, '是否训练')
     flags.DEFINE_integer('class_num', 2, 'output class number')
     #————————————————————————————-—————————————————————————#
-    flags.DEFINE_string('logdir', '/content/herlev_original/logdir', 'Log dir')
-    flags.DEFINE_string('modeldir', '/content/herlev_original/modeldir', 'Model dir')
-    flags.DEFINE_string('sample_dir', '/content/herlev_original/samples/', 'Sample directory')
-    flags.DEFINE_string('record_dir', '/content/herlev_original/record/', 'Experiment record directory')
+    flags.DEFINE_string('logdir', '/content/herlev_original_upscaled_ep1000_lr1e4/logdir', 'Log dir')
+    flags.DEFINE_string('modeldir', '/content/herlev_original_upscaled_ep1000_lr1e4/modeldir', 'Model dir')
+    flags.DEFINE_string('sample_dir', '/content/herlev_original_upscaled_ep1000_lr1e4/samples/', 'Sample directory')
+    flags.DEFINE_string('record_dir', '/content/herlev_original_upscaled_ep1000_lr1e4/record/', 'Experiment record directory')
     #————————————————————————————-—————————————————————————#
     flags.DEFINE_boolean('use_asc', False, 'use ASC or not')
     flags.DEFINE_string('down_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d, adaptive_separate_conv2d')
@@ -88,14 +89,23 @@ def valid():
     valid_accuracy = []
     valid_m_iou = []
     valid_dice =[]
+    valid_epochs = []
+
     conf = configure()
     model = Actions(sess, conf)
     for i in range(conf.valid_start_epoch,conf.valid_end_epoch,conf.valid_stride_of_epoch):
-        loss,acc,m_iou,dice=model.test(i)
+        try:
+            loss, acc, m_iou, dice = model.test(i)
+        except Exception as e:
+            print("Skip checkpoint", i, e)
+            continue
+
+        valid_epochs.append(i)
         valid_loss.append(loss)
         valid_accuracy.append(acc)
         valid_m_iou.append(m_iou)
         valid_dice.append(dice)
+        np.save(conf.record_dir+"validate_epoch.npy",np.array(valid_epochs))
         np.save(conf.record_dir+"validate_loss.npy",np.array(valid_loss))
         np.save(conf.record_dir+"validate_accuracy.npy",np.array(valid_accuracy))
         np.save(conf.record_dir+"validate_m_iou.npy",np.array(valid_m_iou))
@@ -104,6 +114,25 @@ def valid():
         print('valid_accuracy',valid_accuracy)
         print('valid_m_iou',valid_m_iou)
         print('valid_dice',valid_dice)
+        print('valid_epoch',valid_epochs)
+    
+    best_idx = np.argmax(valid_dice)
+    best_epoch = valid_epochs[best_idx]
+
+    with open(conf.record_dir + "best_model.txt", "w") as f:
+        f.write("Best Epoch : {}\n".format(best_epoch))
+        f.write("Best Dice : {}\n".format(valid_dice[best_idx]))
+        f.write("Best Accuracy : {}\n".format(valid_accuracy[best_idx]))
+        f.write("Best mIoU : {}\n".format(valid_m_iou[best_idx]))
+        f.write("Best Loss : {}\n".format(valid_loss[best_idx]))
+
+    print("\n===== BEST MODEL =====")
+    print("Epoch    :", best_epoch)
+    print("Dice     :", valid_dice[best_idx])
+    print("Accuracy :", valid_accuracy[best_idx])
+    print("mIoU     :", valid_m_iou[best_idx])
+    print("Loss     :", valid_loss[best_idx])
+    print("======================")
 #———————————————————————————— predict —————————————————————————#
 """
 函数功能：测试
