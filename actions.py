@@ -427,3 +427,37 @@ class Actions(object):
             print('------- no such checkpoint', model_path)
             return
         self.saver.restore(self.sess, model_path)
+#———————————————————————————— predict_image —————————————————————————#
+
+    def predict_image(self, image):
+        """
+        image:
+            numpy array shape (H,W,3)
+
+        return:
+            mask shape (256,256)
+        """
+
+        image = image.astype(np.float32)
+
+        if image.shape[:2] != (self.conf.height, self.conf.width):
+            import cv2
+            image = cv2.resize(
+                image,
+                (self.conf.width, self.conf.height)
+            )
+
+        image = np.expand_dims(image, axis=0)
+        image = np.repeat(image, self.conf.batchsize, axis=0)
+        
+        feed_dict = {
+            self.inputs: image,
+            self.is_train: False
+        }
+
+        prediction = self.sess.run(
+            self.decoded_predictions,
+            feed_dict=feed_dict
+        )
+
+        return prediction[0]

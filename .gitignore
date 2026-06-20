@@ -1,1 +1,14 @@
 __pycache__/
+.venv
+*.pyc
+
+data/
+logdir/
+samples/
+records/
+modeldir/
+
+# i/o sementara
+*.png
+*.BMP
+*.npy

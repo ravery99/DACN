@@ -29,22 +29,22 @@ def configure():
     flags.DEFINE_string('model_name', 'model', 'Model file name')
     flags.DEFINE_integer('reload_epoch', 0, 'Reload epoch')
     # flags.DEFINE_integer('test_epoch', 26501, 'Test or predict epoch')
-    flags.DEFINE_integer('test_epoch', 1, 'Test or predict epoch')
+    flags.DEFINE_integer('test_epoch', 16, 'Test or predict epoch')
     flags.DEFINE_integer('random_seed', int(time.time()), 'random seed')
 
     # flags.DEFINE_integer('summary_step', 10000000, '# of step to save the summary')
     flags.DEFINE_integer('summary_step', 50, '# of step to save the summary')
     #—————————————————————————————————————————————————————#
 
-    # flags.DEFINE_float('learning_rate', 1e-3, 'learning rate')
-    flags.DEFINE_float('learning_rate', 1e-4, 'learning rate')
+    flags.DEFINE_float('learning_rate', 1e-3, 'learning rate')
+    # flags.DEFINE_float('learning_rate', 1e-4, 'learning rate')
     flags.DEFINE_float('beta1', 0.9, 'beta1')
     flags.DEFINE_float('beta2', 0.99, 'beta2')
     flags.DEFINE_float('epsilon', 1e-8, 'epsilon')
 
     flags.DEFINE_integer('gpu_num', 1, 'the number of GPU')
     #—————————————————————————————————————————————————————#
-    flags.DEFINE_string('data_dir', '/content/herlev_upscaled_h5/', 'Name of data directory')
+    flags.DEFINE_string('data_dir', 'data/', 'Name of data directory')
     flags.DEFINE_string('train_data', 'herlev_train.h5', 'Training data')
     flags.DEFINE_string('valid_data', 'herlev_valid.h5', 'Validation data')
     flags.DEFINE_string('test_data', 'herlev_test.h5', 'Testing data')
@@ -59,10 +59,10 @@ def configure():
     flags.DEFINE_boolean('is_training', True, '是否训练')
     flags.DEFINE_integer('class_num', 2, 'output class number')
     #————————————————————————————-—————————————————————————#
-    flags.DEFINE_string('logdir', '/content/herlev_original_upscaled_ep1000_lr1e4/logdir', 'Log dir')
-    flags.DEFINE_string('modeldir', '/content/herlev_original_upscaled_ep1000_lr1e4/modeldir', 'Model dir')
-    flags.DEFINE_string('sample_dir', '/content/herlev_original_upscaled_ep1000_lr1e4/samples/', 'Sample directory')
-    flags.DEFINE_string('record_dir', '/content/herlev_original_upscaled_ep1000_lr1e4/record/', 'Experiment record directory')
+    flags.DEFINE_string('logdir', 'logdir', 'Log dir')
+    flags.DEFINE_string('modeldir', 'modeldir', 'Model dir')
+    flags.DEFINE_string('sample_dir', 'samples', 'Sample directory')
+    flags.DEFINE_string('record_dir', 'records', 'Experiment record directory')
     #————————————————————————————-—————————————————————————#
     flags.DEFINE_boolean('use_asc', False, 'use ASC or not')
     flags.DEFINE_string('down_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d, adaptive_separate_conv2d')
