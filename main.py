@@ -5,12 +5,14 @@ import numpy as np
 # import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-from actions import Actions
-
+from .actions import Actions
+from pathlib import Path
 
 def configure():
     flags = tf.app.flags
 
+    BASE_DIR = Path(__file__).resolve().parent
+    
     #————————————————————————————--—————————————————————————#
     flags.DEFINE_string('network_name', 'acmdenseunet', 'Use which framework:  unet, denseunet, deeplabv3plus')
 
@@ -44,7 +46,7 @@ def configure():
 
     flags.DEFINE_integer('gpu_num', 1, 'the number of GPU')
     #—————————————————————————————————————————————————————#
-    flags.DEFINE_string('data_dir', 'data/', 'Name of data directory')
+    flags.DEFINE_string('data_dir', str(BASE_DIR / 'data/'), 'Name of data directory')
     flags.DEFINE_string('train_data', 'herlev_train.h5', 'Training data')
     flags.DEFINE_string('valid_data', 'herlev_valid.h5', 'Validation data')
     flags.DEFINE_string('test_data', 'herlev_test.h5', 'Testing data')
@@ -59,10 +61,10 @@ def configure():
     flags.DEFINE_boolean('is_training', True, '是否训练')
     flags.DEFINE_integer('class_num', 2, 'output class number')
     #————————————————————————————-—————————————————————————#
-    flags.DEFINE_string('logdir', 'logdir', 'Log dir')
-    flags.DEFINE_string('modeldir', 'modeldir', 'Model dir')
-    flags.DEFINE_string('sample_dir', 'samples', 'Sample directory')
-    flags.DEFINE_string('record_dir', 'records', 'Experiment record directory')
+    flags.DEFINE_string('logdir', str(BASE_DIR / 'logdir'), 'Log dir')
+    flags.DEFINE_string('modeldir', str(BASE_DIR / 'modeldir'), 'Model dir')
+    flags.DEFINE_string('sample_dir', str(BASE_DIR / 'samples'), 'Sample directory')
+    flags.DEFINE_string('record_dir', str(BASE_DIR / 'records'), 'Experiment record directory')
     #————————————————————————————-—————————————————————————#
     flags.DEFINE_boolean('use_asc', False, 'use ASC or not')
     flags.DEFINE_string('down_conv_name', 'conv2d', 'Use which conv op: conv2d, deform_conv2d, adaptive_conv2d, adaptive_separate_conv2d')

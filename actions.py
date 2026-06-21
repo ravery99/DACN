@@ -5,12 +5,12 @@ import numpy as np
 # import tensorflow as tf
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-from data_reader import H5DataLoader
-from img_utils import imsave
-from denseunet import DenseUnet
-from acmdenseunet import AcmDenseUnet
-from ccv import CCV
-import ops
+from .data_reader import H5DataLoader
+from .img_utils import imsave
+from .denseunet import DenseUnet
+from .acmdenseunet import AcmDenseUnet
+from .ccv import CCV
+from src.DACN import ops
 
 class Actions(object):
 #—————————————————————————————————————————————————————#
