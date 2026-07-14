@@ -53,186 +53,90 @@ class Actions(object):
 #———————————————————————————— configure_networks_single —————————————————————————#
     def configure_networks_single(self):
 
-        #——————————————  step：1  ——————————————#
         print("CNS 1", flush=True)
-        self.inputs = tf.placeholder(tf.float32, self.input_shape, name='inputs')
-        self.annotations = tf.placeholder(tf.int64, self.output_shape, name='annotations')
-        self.is_train = tf.placeholder(tf.bool, name='is_train')
-        expand_annotations = tf.expand_dims(self.annotations, -1, name='annotations/expand_dims')
-        one_hot_annotations = tf.squeeze(expand_annotations, axis=[self.channel_axis],name='annotations/squeeze')
-        one_hot_annotations = tf.one_hot(one_hot_annotations, depth=self.conf.class_num,
-            axis=self.channel_axis, name='annotations/one_hot')
 
-        #——————————————  step：2  ——————————————#
+        self.inputs = tf.placeholder(
+            tf.float32,
+            self.input_shape,
+            name='inputs'
+        )
+
+        self.is_train = tf.placeholder(
+            tf.bool,
+            name='is_train'
+        )
+
         print("CNS 2", flush=True)
-        if self.conf.network_name=="denseunet":
+
+        if self.conf.network_name == "denseunet":
             model = DenseUnet(self.sess, self.conf, self.is_train)
             self.outputs, self.rates = model.inference(self.inputs)
-        if self.conf.network_name=="acmdenseunet":
+
+        elif self.conf.network_name == "acmdenseunet":
             model = AcmDenseUnet(self.sess, self.conf, self.is_train)
             self.outputs, self.rates = model.inference(self.inputs)
 
-        shape1 = one_hot_annotations.shape
-        shape2 = self.outputs.shape
-        if shape1[1].value!=shape2[1].value or shape1[2].value!=shape2[2].value:
-            self.outputs= tf.image.resize_bilinear(self.outputs, size=(self.output_shape[1],self.output_shape[2]),
-                                                       align_corners=True, name='loss/bilinear')
-
-        #——————————————  step：3  ——————————————#
         print("CNS 3", flush=True)
-        
-        if self.conf.network_name=="unet" or self.conf.network_name=="denseunet":
-            losses = tf.losses.softmax_cross_entropy(one_hot_annotations, self.outputs, scope='loss/losses')
-            self.decoded_net_pred = tf.argmax(self.outputs, self.channel_axis, name='accuracy/decode_net_pred')
+
+        if self.conf.network_name in ["unet", "denseunet"]:
+
             self.pred = self.outputs
 
-        if self.conf.network_name=="acmdenseunet":
+        else:
 
-            self.net_pred = self.outputs[:,:,:,2:] # utk 2 kelas (default)
-            # self.net_pred = self.outputs[:,:,:,1:] # utk 3 kelas
-            self.decoded_net_pred = tf.argmax(self.net_pred, self.channel_axis, name='accuracy/decode_net_pred')
-            losses1 = tf.losses.softmax_cross_entropy(one_hot_annotations, self.net_pred, scope='loss/losses1')
-            self.predicted_prob = tf.nn.softmax(self.net_pred, name='softmax')
+            self.net_pred = self.outputs[:, :, :, 2:]
 
-            # CCV
-            self.pred = CCV(self.outputs, self.inputs, 2, 0.5, 1e-8)
+            self.pred = CCV(
+                self.outputs,
+                self.inputs,
+                2,
+                0.5,
+                1e-8
+            )
 
-            lambda1 = 0.01
             self.pred = tf.squeeze(self.pred)
-            losses2 = tf.reduce_sum(tf.square(self.pred-tf.cast(self.annotations,"float32")))
-            losses = lambda1*losses1+losses2
 
-        #-----------------------------------------------------------------------------------------------------------------#
-        #——————————————  step：4  ——————————————#
         print("CNS 4", flush=True)
-        
-        print("CNS 4.1")
-        self.loss_op = tf.reduce_mean(losses)
-
-        print("CNS 4.2")
-        optimizer = tf.train.AdamOptimizer(
-            learning_rate=self.conf.learning_rate,
-            beta1=self.conf.beta1,
-            beta2=self.conf.beta2,
-            epsilon=self.conf.epsilon,
-        )
-
-        print("CNS 4.3")
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-
-        print("CNS 4.4")
-        with tf.control_dependencies(update_ops):
-            pass
-
-        print("CNS 4.5")
-        self.train_op = optimizer.minimize(
-            self.loss_op,
-            name="train_op"
-        )
-
-        print("CNS 4.6")
-
-        # self.loss_op = tf.reduce_mean(losses, name='loss/loss_op')
-        
-        # global_step = tf.Variable(
-        #     0,
-        #     trainable=False,
-        #     name='global_step'
-        # )
-
-        # learning_rate = tf.train.piecewise_constant(
-        #     global_step,
-        #         boundaries=[
-        #         int(0.2 * self.conf.max_epoch),
-        #         int(0.6 * self.conf.max_epoch)
-        #     ],
-        #     values=[1e-3, 5e-4, 1e-4]
-        # )
-
-        # optimizer = tf.train.AdamOptimizer(
-        #     learning_rate=learning_rate,
-        #     beta1=self.conf.beta1,
-        #     beta2=self.conf.beta2,
-        #     epsilon=self.conf.epsilon
-        # )
-
-        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-
-        # with tf.control_dependencies(update_ops):
-        #     self.train_op = optimizer.minimize(
-        #         self.loss_op,
-        #         global_step=global_step,
-        #         name='train_op'
-        #     )
-
-
-        
-        # optimizer = tf.train.AdamOptimizer(learning_rate=self.conf.learning_rate,
-        #         beta1=self.conf.beta1, beta2=self.conf.beta2, epsilon=self.conf.epsilon)
-
-        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        # with tf.control_dependencies(update_ops):
-        #     self.train_op = optimizer.minimize(self.loss_op, name='train_op')
-
-        #——————————————  step：5  ——————————————#
-        print("CNS 5", flush=True)
-        
-        self.predictions = self.pred
-        #self.decoded_predictions = tf.argmax(self.predictions, self.channel_axis, name='accuracy/decode_pred')
 
         gamma = 0.5
-        high0 = tf.ones(self.annotations.shape,"int64")
-        low0 = tf.zeros(self.annotations.shape,"int64")
-        gamma0 = tf.ones(self.annotations.shape)*gamma
-        self.decoded_predictions = tf.where(tf.greater_equal(self.predictions,gamma0), high0, low0)
 
-        if self.conf.is_training:
-            correct_prediction = tf.equal(self.annotations, self.decoded_predictions, name='accuracy/correct_pred')
-            self.accuracy_op = tf.reduce_mean(tf.cast(correct_prediction, tf.float32, name='accuracy/cast'),
-                name='accuracy/accuracy_op')
+        high0 = tf.ones(tf.shape(self.pred), dtype=tf.int64)
+        low0 = tf.zeros(tf.shape(self.pred), dtype=tf.int64)
 
-            weights = tf.cast(tf.greater(self.decoded_predictions, 0, name='m_iou/greater'),
-                tf.int32, name='m_iou/weights')
-            self.m_iou, self.miou_op = tf.metrics.mean_iou(self.annotations, self.decoded_predictions, self.conf.class_num,
-                weights, name='m_iou/m_ious')
+        gamma0 = tf.ones(tf.shape(self.pred)) * gamma
 
-            self.out = tf.cast(self.decoded_predictions, tf.float32)
-            self.gt = tf.cast(self.annotations, tf.float32)
+        self.decoded_predictions = tf.where(
+            tf.greater_equal(self.pred, gamma0),
+            high0,
+            low0
+        )
 
-        #——————————————  step：6  ——————————————#
-        print("CNS 6", flush=True)
+        print("CNS 5", flush=True)
 
         tf.set_random_seed(self.conf.random_seed)
-        print("CNS 6.1")
-        
-        vars = tf.global_variables()
-        print("Jumlah global vars:", len(vars))
-
-        total = 0
-        for v in vars:
-            n = np.prod(v.shape.as_list())
-            total += n
-
-        print("Total params:", total)
-
-        # self.sess.run(tf.global_variables_initializer())
-        init = tf.global_variables_initializer()
-        print("CNS 6.2")
-
-        self.sess.run(init)
-        print("CNS 6.3")
-
-        #——————————————  step：7  ——————————————#
-        print("CNS 7", flush=True)
 
         trainable_vars = tf.trainable_variables()
-        g_list = tf.global_variables()
-        bn_moving_vars = [g for g in g_list if 'batch_norm/moving_mean' in g.name]
-        bn_moving_vars += [g for g in g_list if 'batch_norm/moving_variance' in g.name]
-        trainable_vars += bn_moving_vars
-        self.saver = tf.train.Saver(var_list=trainable_vars, max_to_keep=0)
-        self.writer = tf.summary.FileWriter(self.conf.logdir, self.sess.graph)
 
+        g_list = tf.global_variables()
+
+        bn_moving_vars = [
+            g for g in g_list
+            if 'batch_norm/moving_mean' in g.name
+        ]
+
+        bn_moving_vars += [
+            g for g in g_list
+            if 'batch_norm/moving_variance' in g.name
+        ]
+
+        trainable_vars += bn_moving_vars
+
+        self.saver = tf.train.Saver(
+            var_list=trainable_vars,
+            max_to_keep=0
+        )
+
+        print("CNS 6", flush=True)
 #———————————————————————————— train —————————————————————————#
     def train(self):
 
