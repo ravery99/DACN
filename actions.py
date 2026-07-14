@@ -203,7 +203,24 @@ class Actions(object):
         print("CNS 6", flush=True)
 
         tf.set_random_seed(self.conf.random_seed)
-        self.sess.run(tf.global_variables_initializer())
+        print("CNS 6.1")
+        
+        vars = tf.global_variables()
+        print("Jumlah global vars:", len(vars))
+
+        total = 0
+        for v in vars:
+            n = np.prod(v.shape.as_list())
+            total += n
+
+        print("Total params:", total)
+
+        # self.sess.run(tf.global_variables_initializer())
+        init = tf.global_variables_initializer()
+        print("CNS 6.2")
+
+        self.sess.run(init)
+        print("CNS 6.3")
 
         #——————————————  step：7  ——————————————#
         print("CNS 7", flush=True)
