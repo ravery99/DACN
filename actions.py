@@ -95,43 +95,43 @@ class Actions(object):
         #-----------------------------------------------------------------------------------------------------------------#
         #——————————————  step：4  ——————————————#
         self.loss_op = tf.reduce_mean(losses, name='loss/loss_op')
-        global_step = tf.Variable(
-            0,
-            trainable=False,
-            name='global_step'
-        )
+        # global_step = tf.Variable(
+        #     0,
+        #     trainable=False,
+        #     name='global_step'
+        # )
 
-        learning_rate = tf.train.piecewise_constant(
-            global_step,
-                boundaries=[
-                int(0.2 * self.conf.max_epoch),
-                int(0.6 * self.conf.max_epoch)
-            ],
-            values=[1e-3, 5e-4, 1e-4]
-        )
+        # learning_rate = tf.train.piecewise_constant(
+        #     global_step,
+        #         boundaries=[
+        #         int(0.2 * self.conf.max_epoch),
+        #         int(0.6 * self.conf.max_epoch)
+        #     ],
+        #     values=[1e-3, 5e-4, 1e-4]
+        # )
 
-        optimizer = tf.train.AdamOptimizer(
-            learning_rate=learning_rate,
-            beta1=self.conf.beta1,
-            beta2=self.conf.beta2,
-            epsilon=self.conf.epsilon
-        )
-
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-
-        with tf.control_dependencies(update_ops):
-            self.train_op = optimizer.minimize(
-                self.loss_op,
-                global_step=global_step,
-                name='train_op'
-            )
-
-        # optimizer = tf.train.AdamOptimizer(learning_rate=self.conf.learning_rate,
-        #         beta1=self.conf.beta1, beta2=self.conf.beta2, epsilon=self.conf.epsilon)
+        # optimizer = tf.train.AdamOptimizer(
+        #     learning_rate=learning_rate,
+        #     beta1=self.conf.beta1,
+        #     beta2=self.conf.beta2,
+        #     epsilon=self.conf.epsilon
+        # )
 
         # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
         # with tf.control_dependencies(update_ops):
-        #     self.train_op = optimizer.minimize(self.loss_op, name='train_op')
+        #     self.train_op = optimizer.minimize(
+        #         self.loss_op,
+        #         global_step=global_step,
+        #         name='train_op'
+        #     )
+
+        optimizer = tf.train.AdamOptimizer(learning_rate=self.conf.learning_rate,
+                beta1=self.conf.beta1, beta2=self.conf.beta2, epsilon=self.conf.epsilon)
+
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.train_op = optimizer.minimize(self.loss_op, name='train_op')
 
         #——————————————  step：5  ——————————————#
         self.predictions = self.pred
