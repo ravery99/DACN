@@ -106,7 +106,34 @@ class Actions(object):
         #——————————————  step：4  ——————————————#
         print("CNS 4", flush=True)
         
-        self.loss_op = tf.reduce_mean(losses, name='loss/loss_op')
+        print("CNS 4.1")
+        self.loss_op = tf.reduce_mean(losses)
+
+        print("CNS 4.2")
+        optimizer = tf.train.AdamOptimizer(
+            learning_rate=self.conf.learning_rate,
+            beta1=self.conf.beta1,
+            beta2=self.conf.beta2,
+            epsilon=self.conf.epsilon,
+        )
+
+        print("CNS 4.3")
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
+        print("CNS 4.4")
+        with tf.control_dependencies(update_ops):
+            pass
+
+        print("CNS 4.5")
+        self.train_op = optimizer.minimize(
+            self.loss_op,
+            name="train_op"
+        )
+
+        print("CNS 4.6")
+
+        # self.loss_op = tf.reduce_mean(losses, name='loss/loss_op')
+        
         # global_step = tf.Variable(
         #     0,
         #     trainable=False,
@@ -138,12 +165,14 @@ class Actions(object):
         #         name='train_op'
         #     )
 
-        optimizer = tf.train.AdamOptimizer(learning_rate=self.conf.learning_rate,
-                beta1=self.conf.beta1, beta2=self.conf.beta2, epsilon=self.conf.epsilon)
 
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(update_ops):
-            self.train_op = optimizer.minimize(self.loss_op, name='train_op')
+        
+        # optimizer = tf.train.AdamOptimizer(learning_rate=self.conf.learning_rate,
+        #         beta1=self.conf.beta1, beta2=self.conf.beta2, epsilon=self.conf.epsilon)
+
+        # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        # with tf.control_dependencies(update_ops):
+        #     self.train_op = optimizer.minimize(self.loss_op, name='train_op')
 
         #——————————————  step：5  ——————————————#
         print("CNS 5", flush=True)
