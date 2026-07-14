@@ -157,17 +157,18 @@ class Actions(object):
         gamma0 = tf.ones(self.annotations.shape)*gamma
         self.decoded_predictions = tf.where(tf.greater_equal(self.predictions,gamma0), high0, low0)
 
-        correct_prediction = tf.equal(self.annotations, self.decoded_predictions, name='accuracy/correct_pred')
-        self.accuracy_op = tf.reduce_mean(tf.cast(correct_prediction, tf.float32, name='accuracy/cast'),
-            name='accuracy/accuracy_op')
+        if self.conf.is_training:
+            correct_prediction = tf.equal(self.annotations, self.decoded_predictions, name='accuracy/correct_pred')
+            self.accuracy_op = tf.reduce_mean(tf.cast(correct_prediction, tf.float32, name='accuracy/cast'),
+                name='accuracy/accuracy_op')
 
-        weights = tf.cast(tf.greater(self.decoded_predictions, 0, name='m_iou/greater'),
-            tf.int32, name='m_iou/weights')
-        self.m_iou, self.miou_op = tf.metrics.mean_iou(self.annotations, self.decoded_predictions, self.conf.class_num,
-            weights, name='m_iou/m_ious')
+            weights = tf.cast(tf.greater(self.decoded_predictions, 0, name='m_iou/greater'),
+                tf.int32, name='m_iou/weights')
+            self.m_iou, self.miou_op = tf.metrics.mean_iou(self.annotations, self.decoded_predictions, self.conf.class_num,
+                weights, name='m_iou/m_ious')
 
-        self.out = tf.cast(self.decoded_predictions, tf.float32)
-        self.gt = tf.cast(self.annotations, tf.float32)
+            self.out = tf.cast(self.decoded_predictions, tf.float32)
+            self.gt = tf.cast(self.annotations, tf.float32)
 
         #——————————————  step：6  ——————————————#
         print("CNS 6", flush=True)
